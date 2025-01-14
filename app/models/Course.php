@@ -1,14 +1,41 @@
 <?php
 
-namespace App\Models;
-
-use Core\Database;
-
 class Course {
-    public static function getAllCourses() {
-        $db = Database::getInstance();
-        $sql = "SELECT * FROM courses";
-        return $db->query($sql);
+    private $id;
+    private $title;
+    private $description;
+    private $teacher;
+    private $students = [];
+
+    public function __construct($id, $title, $description, $teacher) {
+        $this->id = $id;
+        $this->title = $title;
+        $this->description = $description;
+        $this->teacher = $teacher;
+    }
+
+    public function getId() {
+        return $this->id;
+    }
+
+    public function getTitle() {
+        return $this->title;
+    }
+
+    public function getDescription() {
+        return $this->description;
+    }
+
+    public function getTeacher() {
+        return $this->teacher;
+    }
+
+    public function addStudent($student) {
+        $this->students[] = $student;
+    }
+
+    public function getStudents() {
+        return $this->students;
     }
 }
 
