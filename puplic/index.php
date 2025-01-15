@@ -1,36 +1,90 @@
 <?php
+
 include '../core/Database.php';
+require_once '../core/router.php';
+require_once __DIR__ . '/../config/routes.php';
 
-
-
-try {
-    
-    $db = Database::getInstance();
-    $statusMessage = "<div class='status-message bg-green-500 text-white p-4 rounded-md text-center font-bold' id ='statusMessage'>
-            Connection successful!.
-          </div>";
-} catch (Exception $e) {
-    
-    $statusMessage = "<div class='status-message bg-red-500 text-white p-4 rounded-md text-center font-bold' id ='statusMessage'>
-            Connection failed: " . $e->getMessage() . "
-          </div>";
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-$db = Database::getInstance();
+
+$url = isset($_GET['url']) ? $_GET['url'] : '';
+
+
+if ($url) {
+    try {
+        App\Core\Router::execute($url);
+    } catch (Exception $e) {
+        error_log("Router error: " . $e->getMessage());
+    }
+} else {
+    $statusMessage = "<div class='status-message bg-red-500 text-white p-4 rounded-md text-center font-bold' id='statusUrl'>
+        Aucune URL spécifiée.
+      </div>";
+}
+
+try {
+    $db = App\Core\Database::getInstance();
+    $statusMessage = "<div class='status-message bg-green-500 text-white p-4 rounded-md text-center font-bold' id ='statusMessageConnection'>
+        Connection successful!
+      </div>";
+} catch (PDOException $e) {
+    $statusMessage = "<div class='status-message bg-red-500 text-white p-4 rounded-md text-center font-bold' id ='statusMessageConnection'>
+        Connection failed: " . htmlspecialchars($e->getMessage()) . "
+      </div>";
+}
+
+
+
 $sql = "SELECT name, email, role, status FROM users";
 $data = $db->query($sql);
+
 
 function getStatusColor($status) {
     switch ($status) {
         case 'Active':
-            return 'green-600'; 
+            return 'green-600';
         case 'Pending':
-            return 'yellow-600'; 
+            return 'yellow-600';
         case 'Suspended':
-            return 'red-600'; 
+            return 'red-600';
         default:
-            return 'gray-600'; 
+            return 'gray-600';
     }
+}
+
+
+if ($url === 'update-status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'] ?? null;
+    $status = $_POST['status'] ?? null;
+
+    if (!$email || !$status) {
+        $_SESSION['message'] = 'Email or status is missing.';
+        header('Location: /public/index.php');
+        exit;
+    }
+
+    if (!in_array($status, ['Active', 'Pending', 'Suspended'])) {
+        die("Invalid status");
+    }
+
+    $sql = "UPDATE users SET status = :status WHERE email = :email";
+    $params = ['status' => $status, 'email' => $email];
+
+    try {
+        $stmt = $db->query($sql, $params);
+        if ($stmt) {
+            $_SESSION['message'] = 'Status updated successfully!';
+        } else {
+            $_SESSION['message'] = 'No changes were made.';
+        }
+    } catch (Exception $e) {
+        $_SESSION['message'] = 'Error updating status: ' . htmlspecialchars($e->getMessage());
+    }
+
+    header('Location: /public/index.php');
+    exit;
 }
 ?>
 
@@ -49,18 +103,18 @@ function getStatusColor($status) {
             z-index: 1000;
             width: auto;
             padding: 1rem;
-            
         }
     </style>
     <script>
         window.onload = function() {
-            var statusMessage = document.getElementById('statusMessage');
+            var statusMessage = document.getElementById('statusMessageConnection');
             if (statusMessage) {
                 setTimeout(function() {
                     statusMessage.style.display = 'none';
                 }, 3000);
             }
         }
+        
     </script>
 </head>
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
@@ -107,6 +161,7 @@ function getStatusColor($status) {
                             <th class="px-4 py-2 text-left">Email</th>
                             <th class="px-4 py-2 text-left">Role</th>
                             <th class="px-4 py-2 text-left">Status</th>
+                            <th class="px-4 py-2 text-left">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -118,10 +173,21 @@ function getStatusColor($status) {
                                 echo "<td class='border px-4 py-2'>" . htmlspecialchars($row["email"]) . "</td>";
                                 echo "<td class='border px-4 py-2'>" . htmlspecialchars($row["role"]) . "</td>";
                                 echo "<td class='border px-4 py-2 text-" . getStatusColor($row["status"]) . "'>" . htmlspecialchars($row["status"]) . "</td>";
+                                echo "<td class='border px-4 py-2'>
+                                    <form action='?url=update-status' method='POST'>
+                                        <input type='hidden' name='email' value='" . htmlspecialchars($row["email"]) . "'>
+                                        <select name='status' class='p-1 border rounded'>
+                                            <option value='Active'>Active</option>
+                                            <option value='Pending'>non active</option>
+                                            <option value='Suspended'>suspension</option>
+                                        </select>
+                                        <button type='submit' class='bg-blue-500 text-white p-2 rounded'>Update</button>
+                                    </form>
+                                </td>";
                                 echo "</tr>";
                             }
                         } else {
-                            echo "<tr><td colspan='4' class='text-center py-4'>No data available</td></tr>";
+                            echo "<tr><td colspan='5' class='text-center py-4'>No data available</td></tr>";
                         }
                         ?>
                     </tbody>

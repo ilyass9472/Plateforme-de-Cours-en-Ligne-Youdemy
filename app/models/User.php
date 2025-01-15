@@ -1,18 +1,18 @@
 <?php
 
-class User {
-    public $id;
-    public $name;
-    public $email;
-    public $role;
-    public $status;
+namespace App\Models;
 
-    public function __construct($id, $name, $email, $role, $status) {
-        $this->id = $id;
-        $this->name = $name;
-        $this->email = $email;
-        $this->role = $role;
-        $this->status = $status;
+use App\Core\Database;
+
+class User {
+    private $db;
+
+    public function __construct() {
+        $this->db = Database::getInstance();
     }
 
+    public function updateStatus($email, $status) {
+        $sql = "UPDATE users SET status = :status WHERE email = :email";
+        return $this->db->query($sql, ['status' => $status, 'email' => $email], false);
+    }
 }

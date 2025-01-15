@@ -1,5 +1,6 @@
 <?php 
 
+use App\Models\User;
 class Apprenant extends User {
     private $enrolledCourses = [];
 
