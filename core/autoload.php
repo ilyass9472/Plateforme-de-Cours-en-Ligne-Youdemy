@@ -1,13 +1,12 @@
 <?php 
 spl_autoload_register(function ($class) {
-    $path = __DIR__ . '/../' . str_replace('\\', '/', $class) . '.php';
-    if (file_exists($path)) {
-        require_once $path;
+
+    $path = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
+    $fullPath = __DIR__ . '/../' . $path;
+
+    if (file_exists($fullPath)) {
+        require_once $fullPath;
     } else {
-        throw new Exception("Classe non trouvée : $class ($path)");
+        die("Class file not found: " . $fullPath);
     }
 });
-
-
-
-?>

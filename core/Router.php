@@ -1,19 +1,28 @@
 <?php
-
-namespace App\Core;
+namespace Core;
 
 class Router {
-    private static $routes = [];
-
-    public static function route($url, $callback) {
-        self::$routes[$url] = $callback;
-    }
-
     public static function execute($url) {
-        if (isset(self::$routes[$url])) {
-            call_user_func(self::$routes[$url]);
+        $routes = require_once __DIR__ . '/../config/routes.php';
+        
+        if (isset($routes[$url])) {
+            $parts = explode('@', $routes[$url]);
+            $controllerName = "App\\Controllers\\" . $parts[0];
+            $method = $parts[1];
+
+            if (class_exists($controllerName)) {
+                $controller = new $controllerName();
+
+                if (method_exists($controller, $method)) {
+                    $controller->$method();
+                } else {
+                    die("Method $method not found in $controllerName");
+                }
+            } else {
+                die("Class $controllerName not found");
+            }
         } else {
-            die("Route non trouvée : $url");
+            die("No route found for URL: $url");
         }
     }
 }

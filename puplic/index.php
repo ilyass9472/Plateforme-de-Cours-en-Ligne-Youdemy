@@ -1,20 +1,25 @@
 <?php
-
 include '../core/Database.php';
-require_once '../core/router.php';
 require_once __DIR__ . '/../config/routes.php';
+require_once '../core/autoload.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-
 $url = isset($_GET['url']) ? $_GET['url'] : '';
 
+if (!isset($_SESSION['user_role'])) {
+    header('Location: login.php');
+    exit;
+}
+
+
+$userRole = $_SESSION['user_role'];
 
 if ($url) {
     try {
-        App\Core\Router::execute($url);
+        Core\Router::execute($url);
     } catch (Exception $e) {
         error_log("Router error: " . $e->getMessage());
     }
@@ -35,11 +40,8 @@ try {
       </div>";
 }
 
-
-
 $sql = "SELECT name, email, role, status FROM users";
 $data = $db->query($sql);
-
 
 function getStatusColor($status) {
     switch ($status) {
@@ -53,7 +55,6 @@ function getStatusColor($status) {
             return 'gray-600';
     }
 }
-
 
 if ($url === 'update-status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? null;
@@ -114,7 +115,6 @@ if ($url === 'update-status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 }, 3000);
             }
         }
-        
     </script>
 </head>
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
@@ -126,10 +126,19 @@ if ($url === 'update-status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h1 class="text-3xl font-semibold">Dashboard</h1>
             </div>
             <nav class="mt-10 space-y-2">
-                <a class="block py-2 px-4 text-white hover:bg-blue-700 rounded-md" href="#">Dashboard</a>
-                <a class="block py-2 px-4 text-white hover:bg-blue-700 rounded-md" href="#">Users</a>
-                <a class="block py-2 px-4 text-white hover:bg-blue-700 rounded-md" href="#">Settings</a>
-                <a class="block py-2 px-4 text-white hover:bg-blue-700 rounded-md" href="#">Reports</a>
+                <a class="block py-2 px-4 text-white hover:bg-blue-700 rounded-md" href="">Dashboard</a>
+                <?php if ($userRole == 'admin'): ?>
+                    <a class="block py-2 px-4 text-white hover:bg-blue-700 rounded-md" href="">Users</a>
+                    <a class="block py-2 px-4 text-white hover:bg-blue-700 rounded-md" href="">Settings</a>
+                    <a class="block py-2 px-4 text-white hover:bg-blue-700 rounded-md" href="">Reports</a>
+                <?php endif; ?>
+                <?php if ($userRole == 'Apprenant'): ?>
+                    <a class="block py-2 px-4 text-white hover:bg-blue-700 rounded-md" href="">Courses</a>
+                    <a class="block py-2 px-4 text-white hover:bg-blue-700 rounded-md" href="">Grades</a>
+                <?php endif; ?>
+                <?php if ($userRole == 'Enseiniant'): ?>
+                    <a class="block py-2 px-4 text-white hover:bg-blue-700 rounded-md" href="">Manage Courses</a>
+                <?php endif; ?>
             </nav>
         </div>
 
