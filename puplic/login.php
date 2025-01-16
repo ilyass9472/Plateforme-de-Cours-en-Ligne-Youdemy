@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $result = $db->query($sql, $params);
             $user = $result[0] ?? null;
 
-            if ($user && $password == $user['password']) { // Vérification sans hachage
+            if ($user && $password == $user['password']) {
                 $_SESSION['user'] = [
                     'id' => $user['id'],
                     'name' => $user['name'],
@@ -73,10 +73,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             max-width: 80%;
         }
     </style>
+    <script>
+        window.onload = function() {
+
+            var statusMessage = document.getElementById('statusMessage');
+            if (statusMessage) {
+                setTimeout(function() {
+                    statusMessage.style.display = 'none';
+                }, 3000);
+            }
+        }
+    </script>
 </head>
 <body class="bg-gradient-to-r from-blue-500 to-indigo-600 min-h-screen flex items-center justify-center p-4">
     <?php if ($message): ?>
-        <div class="status-message bg-red-500 text-white p-4 rounded-md text-center font-bold">
+        <div class="status-message bg-red-500 text-white p-4 rounded-md text-center font-bold" id ='statusMessage'>
             <?php echo $message; ?>
         </div>
     <?php endif; ?>

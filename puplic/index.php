@@ -38,9 +38,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - YouDemy</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .status-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            min-width: 300px;
+            max-width: 80%;
+        }
+    </style>
+    <script>
+        window.onload = function() {
+
+            var statusMessage = document.getElementById('statusMessage');
+            if (statusMessage) {
+                setTimeout(function() {
+                    statusMessage.style.display = 'none';
+                }, 3000);
+            }
+        }
+    </script>
 </head>
 <body class="bg-gray-100 font-sans">
 
+<div class="status-message bg-green-500 text-white p-4 rounded-md text-center font-bold" id ='statusMessage'>
+            bounjour Mr ilyass
+        </div>
 
     <div class="flex">
         <div class="w-64 h-screen bg-indigo-600 text-white">
