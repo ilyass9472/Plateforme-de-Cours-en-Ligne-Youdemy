@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../app/controllers/session_manager.php';
+require_once '../app/controllers/sessionManager.php';
 require_once '../core/Database.php';
 
 $message = '';
@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $message = 'Veuillez entrer un email valide.';
+        $message = 'Veuillez entrer un email.';
     } elseif (empty($password)) {
         $message = 'Veuillez entrer un mot de passe.';
     } else {
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         header("Location: index.php");
                         exit;
                     case 'Apprenant':
-                        header("Location: courses.php");
+                        header("Location: Courses.php");
                         exit;
                     case 'Enseignant':
                         header("Location: createCourses.php");
@@ -101,12 +101,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST" class="space-y-6">
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                <input type="email" id="email" name="email" class="mt-1 block w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Entrez votre email" required>
+                <input type="email" id="email" name="email" class="mt-1 block w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Entrez votre email" >
             </div>
 
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
-                <input type="password" id="password" name="password" class="mt-1 block w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Entrez votre mot de passe" required>
+                <input type="password" id="password" name="password" class="mt-1 block w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Entrez votre mot de passe" >
             </div>
 
             <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">

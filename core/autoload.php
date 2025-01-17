@@ -1,12 +1,17 @@
 <?php 
 spl_autoload_register(function ($class) {
+    $prefix = 'App\\';
+    $base_dir = __DIR__ . '/../app/';
 
-    $path = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
-    $fullPath = __DIR__ . '/../' . $path;
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        return;
+    }
 
-    if (file_exists($fullPath)) {
-        require_once $fullPath;
-    } else {
-        die("Class file not found: " . $fullPath);
+    $relative_class = substr($class, $len);
+    $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
+
+    if (file_exists($file)) {
+        require $file;
     }
 });

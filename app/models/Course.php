@@ -1,43 +1,62 @@
 <?php
 
-class Course {
-    private $id;
-    private $title;
-    private $description;
-    private $teacher;
-    private $students = [];
+namespace App\Models;
 
-    public function __construct($id, $title, $description, $teacher) {
-        $this->id = $id;
-        $this->title = $title;
-        $this->description = $description;
-        $this->teacher = $teacher;
+use App\Core\Database;
+
+class Course
+{
+    private $db;
+
+    public function __construct()
+    {
+        $this->db = Database::getInstance();
     }
 
-    public function getId() {
-        return $this->id;
+    
+    public function create($data)
+    {
+        $sql = "INSERT INTO courses (title, description) VALUES (:title, :description)";
+        $params = [
+            ':title' => $data['title'],
+            ':description' => $data['description'],
+        ];
+        return $this->db->query($sql, $params, false);
     }
 
-    public function getTitle() {
-        return $this->title;
+    
+    public function getAll()
+    {
+        $sql = "SELECT * FROM courses";
+        return $this->db->query($sql);
     }
 
-    public function getDescription() {
-        return $this->description;
+    
+    public function getById($id)
+    {
+        $sql = "SELECT * FROM courses WHERE id = :id";
+        $params = [':id' => $id];
+        $result = $this->db->query($sql, $params);
+        return $result ? $result[0] : null;
     }
 
-    public function getTeacher() {
-        return $this->teacher;
+    
+    public function update($id, $data)
+    {
+        $sql = "UPDATE courses SET title = :title, description = :description WHERE id = :id";
+        $params = [
+            ':title' => $data['title'],
+            ':description' => $data['description'],
+            ':id' => $id,
+        ];
+        return $this->db->query($sql, $params, false);
     }
 
-    public function addStudent($student) {
-        $this->students[] = $student;
-    }
-
-    public function getStudents() {
-        return $this->students;
+    
+    public function delete($id)
+    {
+        $sql = "DELETE FROM courses WHERE id = :id";
+        $params = [':id' => $id];
+        return $this->db->query($sql, $params, false);
     }
 }
-
-
-?>

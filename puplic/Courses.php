@@ -1,5 +1,10 @@
 <?php
+
 session_start();
+
+
+use App\Controllers\EnseignantController;
+
 require_once '../core/Database.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Apprenant') {
@@ -10,6 +15,14 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Apprenant') {
 $db = App\Core\Database::getInstance();
 $sql = "SELECT * FROM courses";
 $courses = $db->query($sql);
+
+
+$controller = new EnseignantController();
+$enseignants = $controller->listEnseignants();
+foreach ($enseignants as $enseignant) {
+    echo "<p>{$enseignant['id']}: {$enseignant['name']} - {$enseignant['email']}</p>";
+}
+
 ?>
 
 <!DOCTYPE html>
