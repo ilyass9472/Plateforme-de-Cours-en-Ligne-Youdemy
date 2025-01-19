@@ -1,18 +1,5 @@
 <?php
 session_start();
-require_once __DIR__.'../core/Database.php';
-
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Apprenant') {
-    header('Location: login.php');
-    exit();
-}
-
-$db = App\Core\Database::getInstance();
-$sql = "SELECT * FROM courses";
-$courses = $db->query($sql);
-
-
-session_start();
 use App\Controllers\CourseController;
 
 include './core/Database.php';
@@ -33,8 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: coursesView.php");
     exit();
 }
-?>
-
 ?>
 
 <!DOCTYPE html>

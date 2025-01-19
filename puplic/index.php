@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../autoload.php';
 require_once '../core/Database.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'admin') {

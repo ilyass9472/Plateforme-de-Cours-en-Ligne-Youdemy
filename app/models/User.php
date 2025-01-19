@@ -1,49 +1,42 @@
 <?php
-
 namespace App\Models;
 
-use Core\Database;
-use PDOException;
+use App\Core\Database;
 
 class User {
-    private $id;
-    private $email;
-    private $password;
+    private $db;
 
-    public static function findByEmail(string $email) {
-        try {
-            $db = Database::getInstance()->getConnection();
-            $stmt = $db->prepare("SELECT * FROM users WHERE email = ?");
-            $stmt->execute([$email]);
-            return $stmt->fetchObject(self::class);
-        } catch (PDOException $e) {
-            throw new \Exception("Erreur lors de la récupération de l'utilisateur : " . $e->getMessage());
-        }
+    public function __construct() {
+        $this->db = Database::getInstance();
     }
 
-    public function updateStatus(string $status): bool {
-        try {
-            $db = Database::getInstance()->getConnection();
-            $sql = "UPDATE users SET status = :status WHERE email = :email";
-            $stmt = $db->prepare($sql);
-            $stmt->bindParam(':status', $status);
-            $stmt->bindParam(':email', $this->email);
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            throw new \Exception("Échec de la mise à jour du statut : " . $e->getMessage());
-        }
+    // Créer un utilisateur
+    public function createUser($name, $email, $password, $role) {
+        $sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
+        return $this->db->query($sql, [$name, $email, password_hash($password, PASSWORD_DEFAULT), $role], false);
     }
 
-    
-    public function getId() {
-        return $this->id;
+    // Obtenir tous les utilisateurs
+    public function getAllUsers() {
+        $sql = "SELECT * FROM users";
+        return $this->db->query($sql);
     }
 
-    public function getEmail() {
-        return $this->email;
+    // Obtenir un utilisateur par ID
+    public function getUserById($id) {
+        $sql = "SELECT * FROM users WHERE id = ?";
+        return $this->db->query($sql, [$id])[0] ?? null;
     }
 
-    public function getPassword() {
-        return $this->password;
+    // Mettre à jour un utilisateur
+    public function updateUser($id, $name, $email, $password, $role) {
+        $sql = "UPDATE users SET name = ?, email = ?, password = ?, role = ? WHERE id = ?";
+        return $this->db->query($sql, [$name, $email, password_hash($password, PASSWORD_DEFAULT), $role, $id], false);
+    }
+
+    // Supprimer un utilisateur
+    public function deleteUser($id) {
+        $sql = "DELETE FROM users WHERE id = ?";
+        return $this->db->query($sql, [$id], false);
     }
 }
