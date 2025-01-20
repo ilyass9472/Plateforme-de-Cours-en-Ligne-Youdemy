@@ -67,6 +67,29 @@ $courses = $enseignant->index();
             <?php echo htmlspecialchars($message); ?>
         </div>
     <?php endif; ?>
+    
+    <div class="flex">
+        <div class="w-64 h-screen bg-indigo-600 text-white">
+            <div class="p-4">
+                <h1 class="text-2xl font-bold">YouDemy Admin</h1>
+                <ul class="mt-6">
+                    
+                    <li>
+                        <a href="tags.php" class="block py-2 px-4 hover:bg-indigo-700">Manage Courses</a>
+                    </li>
+                    <li>
+                        <a href="createCourses.php" class="block py-2 px-4 hover:bg-indigo-700">Create Courses</a>
+                    </li>
+                    <li>
+                        <a href="index.php" class="block py-2 px-4 hover:bg-indigo-700">Manage Users</a>
+                    </li>
+                    <li>
+                        <a href="login.php" class="block py-2 px-4 hover:bg-indigo-700">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
 
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-4xl font-bold text-center text-gray-800 mb-12">Gérer les Cours</h1>
@@ -157,7 +180,8 @@ $courses = $enseignant->index();
             </form>
         </div>
     </div>
-
+    </div>
+    </div>
     <script>
         window.onload = function() {
             var statusMessage = document.getElementById('statusMessage');

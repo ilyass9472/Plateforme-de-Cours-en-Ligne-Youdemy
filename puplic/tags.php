@@ -53,6 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $tags = $tagController->getAllTags();
 ?>
 
+
+
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -81,7 +84,6 @@ $tags = $tagController->getAllTags();
     <?php endif; ?>
 
     <div class="flex">
-        <!-- Sidebar -->
         <div class="w-64 h-screen bg-indigo-600 text-white">
             <div class="p-4">
                 <h1 class="text-2xl font-bold">YouDemy Admin</h1>
