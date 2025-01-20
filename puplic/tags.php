@@ -9,14 +9,14 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'admin') {
 }
 
 $db = App\Core\Database::getInstance();
-$sql = "SELECT * FROM users";
+$sql = "SELECT * FROM tags";
 $users = $db->query($sql);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
-    $user_id = $_POST['user_id'];
-    $new_status = $_POST['status'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
+    $user_id = $_POST['id'];
+    $new_status = $_POST['name'];
 
-    $update_sql = "UPDATE users SET status = :status WHERE id = :user_id";
+    $update_sql = "UPDATE users SET name = :name WHERE id = :id";
     $params = [
         'status' => $new_status,
         'user_id' => $user_id
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
         header("Location: index.php");
         exit();
     } catch (Exception $e) {
-        echo "Erreur lors de la mise à jour du statut: " . $e->getMessage();
+        echo "Erreur lors de la mise à jour du nom: " . $e->getMessage();
     }
 }
 ?>
@@ -65,7 +65,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
 <body class="bg-gray-100 font-sans">
 
 <div class="status-message bg-green-500 text-white p-4 rounded-md text-center font-bold" id ='statusMessage'>
-            bounjour Mr ilyass
+            <?php foreach ($message as $message): ?>
+            echo '$message';
+
+            <?php endforeach; ?>
         </div>
 
     <div class="flex">
@@ -105,10 +108,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
                             <tr>
                                 <th class="py-3 px-4 text-left">ID</th>
                                 <th class="py-3 px-4 text-left">Name</th>
-                                <th class="py-3 px-4 text-left">Email</th>
-                                <th class="py-3 px-4 text-left">Role</th>
-                                <th class="py-3 px-4 text-left">Status</th>
-                                <th class="py-3 px-4 text-left">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -116,18 +115,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
                                 <tr class="border-b">
                                     <td class="py-3 px-4"><?php echo htmlspecialchars($user['id']); ?></td>
                                     <td class="py-3 px-4"><?php echo htmlspecialchars($user['name']); ?></td>
-                                    <td class="py-3 px-4"><?php echo htmlspecialchars($user['email']); ?></td>
-                                    <td class="py-3 px-4"><?php echo htmlspecialchars($user['role']); ?></td>
-                                    <td class="py-3 px-4"><?php echo htmlspecialchars($user['status']); ?></td>
                                     <td class="py-3 px-4">
                                         
                                         <form method="POST" action="index.php" class="inline-block">
                                             <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                                            <select name="status" class="bg-indigo-600 text-white py-2 px-4 rounded-md">
-                                                <option value="Active" <?php echo $user['status'] === 'Active' ? 'selected' : ''; ?>>Active</option>
-                                                <option value="Suspended" <?php echo $user['status'] === 'Suspended' ? 'selected' : ''; ?>>Suspended</option>
-                                                <option value="Non Active" <?php echo $user['status'] === 'Non Active' ? 'selected' : ''; ?>>Non Active</option>
-                                            </select>
                                             <button type="submit" class="ml-2 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Update Status</button>
                                         </form>
                                     </td>

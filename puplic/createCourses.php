@@ -10,6 +10,8 @@ use App\Controllers\SessionManager;
 use App\Models\Enseignant;
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Enseignant') {
+    
+} elseif (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'admin') {
     header('Location: login.php');
     exit();
 }
@@ -60,7 +62,6 @@ $courses = $enseignant->index();
     <title>Gérer les Cours</title>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- Status Message -->
     <?php if (!empty($message)): ?>
         <div class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-lg z-50" id="statusMessage">
             <?php echo htmlspecialchars($message); ?>

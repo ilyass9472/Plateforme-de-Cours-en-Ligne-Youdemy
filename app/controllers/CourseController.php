@@ -10,6 +10,7 @@ class CourseController {
 
     public function index() {
         return $this->model->getAllCourses();
+
     }
 
     public function create($title, $description, $enseignantId) {
