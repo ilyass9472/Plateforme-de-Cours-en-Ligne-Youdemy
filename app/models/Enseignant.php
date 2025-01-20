@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Models;
-
 use App\Core\Database;
 
 class Enseignant
@@ -12,15 +11,41 @@ class Enseignant
     {
         $this->db = Database::getInstance();
     }
-
     
-    public function create($data)
+    
+    public function index()
     {
-        $sql = "INSERT INTO enseignants (name, email) VALUES (:name, :email)";
+        $sql = "SELECT * FROM courses";
+        return $this->db->query($sql);
+    }
+    
+    public function create($title, $description, $enseignantId)
+{
+    $sql = "INSERT INTO courses (title, description, Enseiniant_id) VALUES (:title, :description, :enseignant_id)";
+    $params = [
+        ':title' => $title,
+        ':description' => $description,
+        ':enseignant_id' => $enseignantId
+    ];
+    return $this->db->query($sql, $params, false);
+}
+    
+    public function update($id, $title, $description)
+    {
+        $sql = "UPDATE courses SET title = :title, description = :description WHERE id = :id";
         $params = [
-            ':name' => $data['name'],
-            ':email' => $data['email'],
+            ':id' => $id,
+            ':title' => $title,
+            ':description' => $description
         ];
+        return $this->db->query($sql, $params, false);
+    }
+    
+    
+    public function delete($id)
+    {
+        $sql = "DELETE FROM courses WHERE id = :id";
+        $params = [':id' => $id];
         return $this->db->query($sql, $params, false);
     }
 
@@ -30,7 +55,6 @@ class Enseignant
         $sql = "SELECT * FROM enseignants";
         return $this->db->query($sql);
     }
-
     
     public function getById($id)
     {
@@ -38,25 +62,5 @@ class Enseignant
         $params = [':id' => $id];
         $result = $this->db->query($sql, $params);
         return $result ? $result[0] : null;
-    }
-
-    
-    public function update($id, $data)
-    {
-        $sql = "UPDATE enseignants SET name = :name, email = :email WHERE id = :id";
-        $params = [
-            ':name' => $data['name'],
-            ':email' => $data['email'],
-            ':id' => $id,
-        ];
-        return $this->db->query($sql, $params, false);
-    }
-
-    
-    public function delete($id)
-    {
-        $sql = "DELETE FROM enseignants WHERE id = :id";
-        $params = [':id' => $id];
-        return $this->db->query($sql, $params, false);
     }
 }

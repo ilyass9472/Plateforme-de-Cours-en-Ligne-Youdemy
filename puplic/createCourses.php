@@ -1,22 +1,20 @@
 <?php
 session_start();
 require_once '../autoload.php';
-
+require_once '../app/models/Enseignant.php';
 require_once '../app/controllers/EnseignantController.php';
 require_once '../app/controllers/sessionManager.php';
 
 use App\Controllers\EnseignantController;
 use App\Controllers\SessionManager;
-
-
-// SessionManager::checkRole('Enseignant');
+use App\Models\Enseignant;
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Enseignant') {
     header('Location: login.php');
     exit();
 }
 
-$controller = new EnseignantController();
+$enseignant = new Enseignant();
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -25,15 +23,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         switch ($action) {
             case 'create':
-                $controller->create($_POST['title'], $_POST['description'], $_SESSION['user']['id']);
+                $enseignant->create(
+                    $_POST['title'],
+                    $_POST['description'],
+                    $_SESSION['user']['id']
+                );
                 $message = 'Cours ajouté avec succès';
                 break;
             case 'update':
-                $controller->update($_POST['id'], $_POST['title'], $_POST['description']);
+                $enseignant->update(
+                    $_POST['id'],
+                    $_POST['title'],
+                    $_POST['description']
+                );
                 $message = 'Cours mis à jour avec succès';
                 break;
             case 'delete':
-                $controller->delete($_POST['id']);
+                $enseignant->delete($_POST['id']);
                 $message = 'Cours supprimé avec succès';
                 break;
         }
@@ -42,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$courses = $controller->index();
+$courses = $enseignant->index();
 ?>
 
 <!DOCTYPE html>
@@ -53,70 +59,124 @@ $courses = $controller->index();
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Gérer les Cours</title>
 </head>
-<body class="bg-gray-100 text-gray-900">
-    <div class="container mx-auto p-4">
-        <h1 class="text-3xl font-bold mb-4">Gérer les Cours</h1>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Status Message -->
+    <?php if (!empty($message)): ?>
+        <div class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-lg z-50" id="statusMessage">
+            <?php echo htmlspecialchars($message); ?>
+        </div>
+    <?php endif; ?>
 
-        <?php if (!empty($message)): ?>
-            <div class="bg-blue-500 text-white p-2 mb-4 rounded">
-                <?php echo htmlspecialchars($message); ?>
-            </div>
-        <?php endif; ?>
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-12">Gérer les Cours</h1>
 
-        <table class="w-full mb-6 border-collapse">
-            <thead>
-                <tr>
-                    <th class="border px-4 py-2">ID</th>
-                    <th class="border px-4 py-2">Titre</th>
-                    <th class="border px-4 py-2">Description</th>
-                    <th class="border px-4 py-2">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($courses as $course): ?>
-                    <tr>
-                        <td class="border px-4 py-2"><?php echo htmlspecialchars($course['id']); ?></td>
-                        <td class="border px-4 py-2"><?php echo htmlspecialchars($course['title']); ?></td>
-                        <td class="border px-4 py-2"><?php echo htmlspecialchars($course['description']); ?></td>
-                        <td class="border px-4 py-2">
-                            <form method="post" class="inline-block">
-                                <input type="hidden" name="id" value="<?php echo htmlspecialchars($course['id']); ?>">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            <?php if($courses): foreach ($courses as $course): ?>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                    
+                    <div class="p-6 bg-gradient-to-r from-emerald-500 to-emerald-600">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-white/20 p-3 rounded-xl">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white"><?php echo htmlspecialchars($course['title']); ?></h3>
+                                <span class="text-emerald-100">Course #<?php echo htmlspecialchars($course['id']); ?></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="p-6">
+                        <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                            <p class="text-gray-600">
+                                <?php echo htmlspecialchars($course['description']); ?>
+                            </p>
+                        </div>
+
+                        
+                        <div class="flex gap-3">
+                            <button 
+                                onclick="editCourse('<?php echo $course['id']; ?>', '<?php echo htmlspecialchars($course['title']); ?>', '<?php echo htmlspecialchars($course['description']); ?>')"
+                                class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-xl transition-colors flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                Modifier
+                            </button>
+                            <form method="post" class="flex-1">
+                                <input type="hidden" name="id" value="<?php echo $course['id']; ?>">
                                 <input type="hidden" name="action" value="delete">
-                                <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded">Supprimer</button>
+                                <button type="submit" 
+                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours ?')"
+                                    class="w-full bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl transition-colors flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Supprimer
+                                </button>
                             </form>
-                            <form method="post" class="inline-block">
-                                <input type="hidden" name="id" value="<?php echo htmlspecialchars($course['id']); ?>">
-                                <input type="hidden" name="action" value="update">
-                                <button type="button" class="bg-yellow-500 text-white px-4 py-2 rounded" onclick="populateForm('<?php echo $course['id']; ?>', '<?php echo $course['title']; ?>', '<?php echo $course['description']; ?>')">Modifier</button>
-                            </form>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; endif; ?>
+        </div>
 
-        <h2 class="text-2xl font-bold mb-4">Ajouter / Modifier un Cours</h2>
-        <form method="post" id="courseForm" class="bg-white p-4 rounded shadow">
-            <input type="hidden" name="id" id="courseId">
-            <input type="hidden" name="action" id="formAction" value="create">
-            <div class="mb-4">
-                <label for="title" class="block text-sm font-medium text-gray-700">Titre</label>
-                <input type="text" name="title" id="title" class="mt-1 block w-full border rounded p-2">
-            </div>
-            <div class="mb-4">
-                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                <textarea name="description" id="description" class="mt-1 block w-full border rounded p-2"></textarea>
-            </div>
-            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">Enregistrer</button>
-        </form>
+        
+        <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-8">
+                <?php echo isset($_POST['id']) ? 'Modifier le Cours' : 'Ajouter un Cours'; ?>
+            </h2>
+            <form id="courseForm" method="post" class="space-y-6">
+                <input type="hidden" name="id" id="courseId">
+                <input type="hidden" name="action" id="formAction" value="create">
+                
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Titre du cours</label>
+                    <input type="text" name="title" id="title" required
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring focus:ring-emerald-200 transition duration-300">
+                </div>
+                
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea name="description" id="description" required rows="4"
+                              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring focus:ring-emerald-200 transition duration-300"></textarea>
+                </div>
+                
+                <button type="submit" 
+                    class="w-full bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    Enregistrer
+                </button>
+            </form>
+        </div>
     </div>
 
     <script>
-        function populateForm(id, title, description) {
+        window.onload = function() {
+            var statusMessage = document.getElementById('statusMessage');
+            if (statusMessage) {
+                setTimeout(function() {
+                    statusMessage.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        
+        function editCourse(id, title, description) {
             document.getElementById('courseId').value = id;
             document.getElementById('title').value = title;
             document.getElementById('description').value = description;
             document.getElementById('formAction').value = 'update';
+            window.scrollTo({
+                top: document.getElementById('courseForm').offsetTop - 100,
+                behavior: 'smooth'
+            });
         }
     </script>
 </body>
