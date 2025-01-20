@@ -20,19 +20,18 @@ class Tag {
         return $this->db->query($sql);
     }
 
-    // Obtenir un tag par ID
     public function getTagById($id) {
         $sql = "SELECT * FROM tags WHERE id = ?";
         return $this->db->query($sql, [$id])[0] ?? null;
     }
 
-    // Mettre à jour un tag
+    
     public function updateTag($id, $name) {
         $sql = "UPDATE tags SET name = ? WHERE id = ?";
         return $this->db->query($sql, [$name, $id], false);
     }
 
-    // Supprimer un tag
+    
     public function deleteTag($id) {
         $sql = "DELETE FROM tags WHERE id = ?";
         return $this->db->query($sql, [$id], false);
