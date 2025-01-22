@@ -13,7 +13,7 @@ $tagController = new TagController();
 $message = '';
 $statusClass = '';
 
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'admin') {
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Admin') {
     header('Location: login.php');
     exit();
 }

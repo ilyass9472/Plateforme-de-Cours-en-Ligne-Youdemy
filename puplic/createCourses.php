@@ -11,7 +11,7 @@ use App\Models\Enseignant;
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Enseignant') {
     
-} elseif (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'admin') {
+} elseif (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Admin') {
     header('Location: login.php');
     exit();
 }

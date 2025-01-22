@@ -3,7 +3,7 @@ session_start();
 require_once '../autoload.php';
 require_once '../core/Database.php';
 
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'admin') {
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Admin') {
     header('Location: login.php');
     exit();
 }

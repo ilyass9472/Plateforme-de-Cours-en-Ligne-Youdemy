@@ -1,90 +1,190 @@
 <?php
-session_start();
-require_once __DIR__.'../core/Database.php';
+// controllers/CourseController.php
+namespace App\Controllers;
 
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Apprenant') {
-    header('Location: login.php');
-    exit();
-}
+use App\Models\Course;
+use App\Core\Auth;
 
-$db = App\Core\Database::getInstance();
-$sql = "SELECT * FROM courses";
-$courses = $db->query($sql);
+class CourseController {
+    private $courseModel;
+    private $auth;
 
-
-session_start();
-use App\Controllers\CourseController;
-
-include './core/Database.php';
-require_once '../models/Course.php';
-require_once './app/controllers/CourseController.php';
-
-$controller = new CourseController();
-$courses = $controller->index();
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['add'])) {
-        $controller->create($_POST['title'], $_POST['description'], $_POST['enseignant_id']);
-    } elseif (isset($_POST['update'])) {
-        $controller->update($_POST['id'], $_POST['title'], $_POST['description'], $_POST['enseignant_id']);
-    } elseif (isset($_POST['delete'])) {
-        $controller->delete($_POST['id']);
+    public function __construct() {
+        $this->courseModel = new Course();
+        $this->auth = new Auth();
     }
-    header("Location: coursesView.php");
-    exit();
+
+    public function index() {
+        $this->auth->requireRole('Enseignant');
+        
+        $courses = $this->courseModel->getAllCourses();
+        $this->render('courses/index', ['courses' => $courses]);
+    }
+
+    public function create() {
+        $this->auth->requireRole('Enseignant');
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCourseData();
+            
+            $courseData = [
+                'title' => trim($_POST['title']),
+                'description' => trim($_POST['description']),
+                'instructor_id' => $_SESSION['user']['id']
+            ];
+
+            $this->courseModel->createCourse(
+                $courseData['title'], 
+                $courseData['description'], 
+                $courseData['instructor_id']
+            );
+
+            $this->redirect('/courses');
+        }
+    }
+
+    public function update($id) {
+        $this->auth->requireRole('Enseignant');
+        
+        $course = $this->courseModel->getCourseById($id);
+        if (!$course || $course['instructor_id'] !== $_SESSION['user']['id']) {
+            $this->forbidden();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCourseData();
+            
+            $courseData = [
+                'title' => trim($_POST['title']),
+                'description' => trim($_POST['description']),
+                'instructor_id' => $_SESSION['user']['id']
+            ];
+
+            $this->courseModel->updateCourse(
+                $id,
+                $courseData['title'],
+                $courseData['description'],
+                $courseData['instructor_id']
+            );
+
+            $this->redirect('/courses');
+        }
+    }
+
+    public function delete($id) {
+        $this->auth->requireRole('Enseignant');
+        
+        $course = $this->courseModel->getCourseById($id);
+        if (!$course || $course['instructor_id'] !== $_SESSION['user']['id']) {
+            $this->forbidden();
+        }
+
+        $this->courseModel->deleteCourse($id);
+        $this->redirect('/courses');
+    }
+
+    private function validateCourseData() {
+        $errors = [];
+
+        if (empty($_POST['title'])) {
+            $errors[] = "Le titre est requis";
+        }
+        if (empty($_POST['description'])) {
+            $errors[] = "La description est requise";
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            $this->redirect('/courses/create');
+        }
+    }
+
+    private function render($view, $data = []) {
+        extract($data);
+        require_once __DIR__ . "/../views/{$view}.php";
+    }
+
+    private function redirect($path) {
+        header("Location: {$path}");
+        exit();
+    }
+
+    private function forbidden() {
+        http_response_code(403);
+        die('Accès interdit');
+    }
 }
-?>
 
+// views/courses/index.php
 ?>
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Manage Courses</title>
+    <title>Gestion des cours</title>
 </head>
 <body class="bg-gray-900 text-white">
     <div class="container mx-auto p-4">
-        <h1 class="text-3xl font-bold mb-4">Manage Courses</h1>
-        
-        <table class="w-full mb-6">
-            <thead>
-                <tr>
-                    <th class="border px-4 py-2">ID</th>
-                    <th class="border px-4 py-2">Title</th>
-                    <th class="border px-4 py-2">Description</th>
-                    <th class="border px-4 py-2">Enseignant ID</th>
-                    <th class="border px-4 py-2">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($courses as $course): ?>
-                <tr>
-                    <td class="border px-4 py-2"><?php echo $course['id']; ?></td>
-                    <td class="border px-4 py-2"><?php echo $course['title']; ?></td>
-                    <td class="border px-4 py-2"><?php echo $course['description']; ?></td>
-                    <td class="border px-4 py-2"><?php echo $course['Enseiniant_id']; ?></td>
-                    <td class="border px-4 py-2">
-                        <form method="post" class="inline-block">
-                            <input type="hidden" name="id" value="<?php echo $course['id']; ?>">
-                            <input type="submit" name="delete" value="Delete" class="bg-red-500 text-white px-4 py-2 rounded">
-                        </form>
-                    </td>
-                </tr>
+        <?php if (isset($_SESSION['errors'])): ?>
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
+                <?php foreach ($_SESSION['errors'] as $error): ?>
+                    <p><?php echo htmlspecialchars($error); ?></p>
                 <?php endforeach; ?>
-            </tbody>
-        </table>
+                <?php unset($_SESSION['errors']); ?>
+            </div>
+        <?php endif; ?>
 
-        <h2 class="text-2xl font-bold mb-4">Add/Edit Course</h2>
-        <form method="post" class="bg-gray-800 p-4 rounded-lg">
-            <input type="hidden" name="id" placeholder="ID" class="mb-2 p-2 rounded">
-            <input type="text" name="title" placeholder="Title" class="mb-2 p-2 w-full rounded">
-            <textarea name="description" placeholder="Description" class="mb-2 p-2 w-full rounded"></textarea>
-            <input type="text" name="enseignant_id" placeholder="Enseignant ID" class="mb-2 p-2 rounded">
-            <button type="submit" name="add" class="bg-green-500 px-4 py-2 rounded">Add Course</button>
-        </form>
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">Gestion des cours</h1>
+            <a href="/courses/create" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Nouveau cours
+            </a>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-700">
+                    <tr>
+                        <th class="px-4 py-2 text-left">Titre</th>
+                        <th class="px-4 py-2 text-left">Description</th>
+                        <th class="px-4 py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($courses as $course): ?>
+                    <tr class="border-t border-gray-700">
+                        <td class="px-4 py-2"><?php echo htmlspecialchars($course['title']); ?></td>
+                        <td class="px-4 py-2"><?php echo htmlspecialchars($course['description']); ?></td>
+                        <td class="px-4 py-2 text-right">
+                            <div class="flex justify-end space-x-2">
+                                <a 
+                                    href="/courses/edit/<?php echo $course['id']; ?>" 
+                                    class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                                >
+                                    Modifier
+                                </a>
+                                <form 
+                                    method="POST" 
+                                    action="/courses/delete/<?php echo $course['id']; ?>" 
+                                    class="inline"
+                                    onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce cours ?')"
+                                >
+                                    <button 
+                                        type="submit" 
+                                        class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                                    >
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 </html>

@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ];
 
                 switch ($user['role']) {
-                    case 'admin':
+                    case 'Admin':
                         header("Location: index.php");
                         exit;
                     case 'Apprenant':
