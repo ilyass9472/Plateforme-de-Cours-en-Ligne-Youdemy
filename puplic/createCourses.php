@@ -5,13 +5,12 @@ require_once '../app/models/Enseignant.php';
 require_once '../app/controllers/EnseignantController.php';
 require_once '../app/controllers/sessionManager.php';
 
-use App\Controllers\EnseignantController;
-use App\Controllers\SessionManager;
-use App\Models\Enseignant;
+// use App\Controllers\EnseignantController;
+// use App\Controllers\SessionManager;
 
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Enseignant') {
-    
-} elseif (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Admin') {
+use App\Models\Enseignant;
+if (!isset($_SESSION['user']) || 
+    ($_SESSION['user']['role'] != 'Enseignant' && $_SESSION['user']['role'] != 'Admin')) {
     header('Location: login.php');
     exit();
 }

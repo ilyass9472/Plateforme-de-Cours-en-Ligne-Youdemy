@@ -38,7 +38,7 @@ class TagController {
             throw new Exception("ID de tag invalide");
         }
         
-        // Check if tag exists before updating
+        
         $existingTag = $this->getTagById($id);
         if (!$existingTag) {
             throw new Exception("Tag non trouvé");

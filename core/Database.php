@@ -8,7 +8,6 @@ use PDOException;
 class Database {
     private static $instance = null;
     private $pdo;
-
     private function __construct() {
         $host = 'localhost';
         $db = 'youdemy';
@@ -28,6 +27,7 @@ class Database {
         }
         return self::$instance;
     }
+
 
     public function query($sql, $params = [], $fetch = true) {
         $stmt = $this->pdo->prepare($sql);

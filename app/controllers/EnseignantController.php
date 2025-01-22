@@ -14,10 +14,10 @@ class EnseignantController
     }
 
     
-    public function createEnseignant($data)
-    {
-        return $this->enseignantModel->create($data);
-    }
+    // public function createEnseignant($data)
+    // {
+    //     return $this->enseignantModel->create($data);
+    // }
 
     
     public function listEnseignants()
@@ -32,10 +32,10 @@ class EnseignantController
     }
 
     
-    public function updateEnseignant($id, $data)
-    {
-        return $this->enseignantModel->update($id, $data);
-    }
+    // public function updateEnseignant($id, $data)
+    // {
+    //     return $this->enseignantModel->update($id, $data);
+    // }
     
     public function deleteEnseignant($id)
     {

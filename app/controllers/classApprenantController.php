@@ -11,7 +11,7 @@ class ApprenantController {
         $this->apprenantModel = new Apprenant();
     }
 
-    // Afficher tous les cours disponibles
+    
     public function listAvailableCourses() {
         try {
             $courses = $this->apprenantModel->getAllCourses();
@@ -27,7 +27,7 @@ class ApprenantController {
         }
     }
 
-    // Afficher les cours de l'apprenant
+    
     public function listEnrolledCourses($studentId) {
         try {
             $courses = $this->apprenantModel->getEnrolledCourses($studentId);
@@ -43,7 +43,7 @@ class ApprenantController {
         }
     }
 
-    // S'inscrire à un cours
+    
     public function enrollCourse($studentId, $courseId) {
         try {
             $this->apprenantModel->enrollToCourse($studentId, $courseId);
@@ -59,7 +59,7 @@ class ApprenantController {
         }
     }
 
-    // Se désinscrire d'un cours
+    
     public function unenrollCourse($studentId, $courseId) {
         try {
             $this->apprenantModel->unenrollFromCourse($studentId, $courseId);
@@ -75,7 +75,7 @@ class ApprenantController {
         }
     }
 
-    // Obtenir les détails et la progression d'un cours
+    
     public function getCourseInfo($studentId, $courseId) {
         try {
             $courseDetails = $this->apprenantModel->getCourseDetails($courseId);

@@ -1,5 +1,4 @@
 <?php
-// controllers/CourseController.php
 namespace App\Controllers;
 
 use App\Models\Course;
@@ -115,7 +114,7 @@ class CourseController {
     }
 }
 
-// views/courses/index.php
+
 ?>
 <!DOCTYPE html>
 <html lang="fr">

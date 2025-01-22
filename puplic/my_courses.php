@@ -1,24 +1,20 @@
 <?php
-// my_courses.php
 session_start();
-
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'Apprenant') {
     header('Location: login.php');
     exit();
 }
 
-require_once '../models/Course.php';
+require_once '../app/models/Course.php';
 $courseModel = new App\Models\Course();
 
-// Récupération des cours de l'utilisateur
-$sql = "SELECT c.*, cp.progress, u.name as instructor_name 
-        FROM courses c 
-        JOIN enrollments e ON c.id = e.course_id 
-        LEFT JOIN course_progress cp ON c.id = cp.course_id AND cp.student_id = ?
-        JOIN users u ON c.instructor_id = u.id
-        WHERE e.student_id = ?";
 
-$courses = $courseModel->db->query($sql, [$_SESSION['user_id'], $_SESSION['user_id']]);
+$sql = "SELECT * FROM users WHERE email = :email AND status = 'active' LIMIT 1";
+
+
+$courses = $courseModel->getUserCourses($_SESSION['user']['id']);
+
+
 ?>
 
 <!DOCTYPE html>
@@ -56,7 +52,7 @@ $courses = $courseModel->db->query($sql, [$_SESSION['user_id'], $_SESSION['user_
                                     Enseignant: <?php echo htmlspecialchars($course['instructor_name']); ?>
                                 </span>
                             </div>
-                            <!-- Barre de progression -->
+                            
                             <div class="mt-4">
                                 <div class="w-full bg-gray-200 rounded-full h-2.5">
                                     <div 
